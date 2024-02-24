@@ -158,7 +158,7 @@ while running:
             if bullets:
                 for (i, el) in enumerate(bullets):
                     screen.blit(bullet, (el.x, el.y))
-                    el.x += 4
+                    el.x += 6
 
                     if el.x > 630:
                         bullets.pop(i)
@@ -172,6 +172,7 @@ while running:
                                 if score % 70 == 0:
                                     bullets_left += 10
 
+
         else:
             screen.blit(lose_page, (0, -120))
             screen.blit(lose_label, (220, 120))
@@ -183,7 +184,8 @@ while running:
                 player_x = 150
                 ghost_list_in_game.clear()
                 bullets.clear()
-                bullets_left = 5
+                bullets_left = 10
+                score = 0
 
         health_label = label_game.render("Health: " + str(player_health), True, (255, 255, 255))
         screen.blit(health_label, (10, 10))
