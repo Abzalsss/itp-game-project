@@ -28,6 +28,7 @@ lose_page = pygame.image.load("images/lose_page.png")
 ghost = pygame.image.load("images/ghost.png").convert_alpha()
 
 ghost_list_in_game = []
+ghost_count = 0
 
 player_anim_count = 0
 bg_x = 0
@@ -44,7 +45,9 @@ bg_sound.play()
 ghost_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(ghost_timer, 2500)
 
-label = pygame.font.SysFont('fonts/Roboto-Regular.ttf', 60)
+label = pygame.font.SysFont('fonts/Roboto-Regular.ttf', 75)
+label_game = pygame.font.SysFont('fonts/Roboto-Regular.ttf', 30)
+
 lose_label = label.render("You lose!", True, (255, 255, 255))
 restart_label = label.render("Restart!", True, (255, 0, 0))
 restart_label_rect = restart_label.get_rect(topleft=(230, 200))
@@ -56,18 +59,31 @@ bullets = []
 gameplay = True
 
 start_page = pygame.image.load("images/start_page.png")
-start_label = label.render("Start!", True, (255, 100, 80))
-start_label_rect = start_label.get_rect(topleft=(240, 140))
+start_label = label.render("Start", True, (0, 0, 0))
+start_label_rect = start_label.get_rect(topleft=(240, 130))
 show_start_page = True
 start_button_color = (255, 255, 255)
+
+quit_button_color = (255, 255, 255)
+quit_button_hover_color = (255, 100, 100)
+quit_label = label.render("Quit", True, (255, 100, 80))
+quit_label_rect = quit_label.get_rect(topleft=(240, 190))
+
+player_health = 100
+health = label.render("Health: ", True, (255, 255, 255))
+
+score = 0
+bullet_count = bullets_left
 
 running = True
 while running:
     if show_start_page:
-        screen.blit(start_page, (0, -100))
+        screen.blit(start_page, (-220, -80))
 
         pygame.draw.rect(screen, start_button_color, start_label_rect)
         screen.blit(start_label, start_label_rect)
+        pygame.draw.rect(screen, quit_button_color, quit_label_rect)
+        screen.blit(quit_label, quit_label_rect)
         pygame.display.update()
 
         for event in pygame.event.get():
@@ -76,6 +92,10 @@ while running:
                 pygame.quit()
             if event.type == pygame.MOUSEBUTTONDOWN and start_label_rect.collidepoint(event.pos):
                 show_start_page = False
+            if event.type == pygame.MOUSEBUTTONDOWN and quit_label_rect.collidepoint(
+                    event.pos):
+                running = False
+                pygame.quit()
 
     else:
         screen.blit(bg, (bg_x, 0))
@@ -92,8 +112,14 @@ while running:
                     if el.x < -10:
                         ghost_list_in_game.pop(i)
 
-                    if player_rect.colliderect(el):
-                        gameplay = False
+                    for (i, el) in enumerate(ghost_list_in_game):
+                        if player_rect.colliderect(el):
+                            player_health -= 20
+                            ghost_list_in_game.pop(i)
+                            if player_health <= 0:
+                                gameplay = False
+                                player_health = 100
+                            break
 
             keys = pygame.key.get_pressed()
             if keys[pygame.K_LEFT]:
@@ -142,9 +168,12 @@ while running:
                             if el.colliderect(ghost_el):
                                 ghost_list_in_game.pop(index)
                                 bullets.pop(i)
+                                score += 10
+                                if score % 70 == 0:
+                                    bullets_left += 10
 
         else:
-            screen.blit(lose_page, (0,-120))
+            screen.blit(lose_page, (0, -120))
             screen.blit(lose_label, (220, 120))
             screen.blit(restart_label, restart_label_rect)
 
@@ -155,6 +184,15 @@ while running:
                 ghost_list_in_game.clear()
                 bullets.clear()
                 bullets_left = 5
+
+        health_label = label_game.render("Health: " + str(player_health), True, (255, 255, 255))
+        screen.blit(health_label, (10, 10))
+
+        score_label = label_game.render("Score: " + str(score), True, (255, 255, 255))
+        screen.blit(score_label, (10, 40))
+
+        bullets_label = label_game.render("Bullets: " + str(bullets_left), True, (255, 255, 255))
+        screen.blit(bullets_label, (10, 70))
 
         pygame.display.update()
 
